@@ -1,0 +1,19 @@
+[package]
+name = "souls"
+version = "0.1.0"
+edition = "2021"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[dependencies]
+avian3d = "0.1.0"
+bevy = { version = "0.14.0", features = ["dynamic_linking", "bevy_debug_stepping"] }
+bevy-debug-text-overlay = { git = "https://github.com/JordanLloydHall/bevy-debug-text-overlay/", branch = "upgrade_to_bevy_0_14" }
+bevy_atmosphere = { git = "https://github.com/Frizi/bevy_atmosphere/", branch = "bevy-0.14" }
+clap = { version = "4.5.11", features = ["derive"] }
+ron = "0.8.1"
+serde = { version = "1.0.204", features = ["derive"] }
