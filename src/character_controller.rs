@@ -1,8 +1,10 @@
+use std::collections::HashSet;
+
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_debug_text_overlay::screen_print;
 
-use crate::schedule::CustomPostUpdate;
+use crate::schedule::{CustomLast, CustomPostUpdate};
 
 const MAX_BOUNCES: u8 = 5;
 const SKIN_WIDTH: f32 = 0.005;
@@ -17,13 +19,33 @@ impl Plugin for CharacterControllerPlugin {
         app.add_systems(
             CustomPostUpdate,
             move_character_controllers.in_set(CharacterControllerSet),
-        );
+        )
+        .add_systems(CustomLast, print_collisions);
     }
 }
 
 #[derive(Component, Default)]
 pub struct CharacterController {
     pub velocity: Vec3, // todo: this is a Vec3 but do we support vertical movement?
+}
+
+fn print_collisions(
+    mut collision_event_reader: EventReader<Collision>,
+    character_controllers: Query<&CharacterController>,
+) {
+    let has_collision = collision_event_reader.read().any(|Collision(contacts)| {
+        character_controllers.contains(contacts.entity1)
+            || character_controllers.contains(contacts.entity2)
+    });
+
+    screen_print!(
+        "{}",
+        if has_collision {
+            "Colliding"
+        } else {
+            "Not colliding"
+        }
+    );
 }
 
 fn move_character_controllers(
