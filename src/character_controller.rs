@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_debug_text_overlay::screen_print;
@@ -64,6 +62,7 @@ fn move_character_controllers(
 
         let mut bounce_count = 0;
         let mut hit_count = 0;
+        let mut planes = Vec::new();
 
         for _ in 0..MAX_BOUNCES {
             bounce_count += 1;
@@ -105,12 +104,20 @@ fn move_character_controllers(
                     let extra_distance = distance - (hit.time_of_impact - SKIN_WIDTH).max(0.0);
                     let extra_velocity = direction * extra_distance;
 
-                    let projected_velocity =
+                    let mut projected_velocity =
                         extra_velocity - (extra_velocity.dot(hit.normal1) * hit.normal1);
 
                     if projected_velocity.dot(*start_direction) <= 0.0 {
                         break;
                     }
+
+                    for plane in &planes {
+                        if hit.normal1.dot(*plane) > 0.99 {
+                            projected_velocity += hit.normal1 * 0.01;
+                        }
+                    }
+
+                    planes.push(hit.normal1);
 
                     direction_result = Dir3::new(projected_velocity);
                     distance = projected_velocity.length();
